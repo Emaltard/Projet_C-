@@ -1,0 +1,4 @@
+//Pour generer le makefile sous Linux: qmake Char.pro
+//Pour generer le makefile sous Windows: qmake -spec win32-g++ Char.pro
+
+//Lancer le makefile: make all

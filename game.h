@@ -74,6 +74,7 @@ public slots:
 signals:
     void changementTour(int tour);
     void changement_deplacement(int nb_deplacement_restant);
+    void changement_vie(int vie);
     void signal_findujeu(int joueur);
 
 };

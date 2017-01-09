@@ -1,0 +1,15 @@
+INPUT(
+./release\main.o
+./release\game.o
+./release\mafenetre.o
+./release\char.o
+./release\terrain.o
+./release\obstacle.o
+./release\roche.o
+./release\eau.o
+./release\crevasse.o
+./release\arbre.o
+./release\qrc_ressources.o
+./release\moc_game.o
+./release\moc_mafenetre.o
+);

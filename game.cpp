@@ -44,7 +44,7 @@ Game:: Game(int nbjoueur){
     char1_texture = scene->addPixmap(char1->get_Texture_Corps());
     char1_texture_cannon = scene->addPixmap(char1->get_Texture_Cannon());
     char1_texture->setPos( position_x,position_y);
-    char1_texture_cannon->setPos( position_x,position_y);
+    char1_texture_cannon->setPos( position_x +(25/2),position_y+(25/2));
 
     char2 = new Char(2);
     position_x=rand() % L -(L/5)-25;
@@ -58,7 +58,7 @@ Game:: Game(int nbjoueur){
     char2_texture = scene->addPixmap(char2->get_Texture_Corps());
     char2_texture_cannon = scene->addPixmap(char2->get_Texture_Cannon());
     char2_texture->setPos(position_x,position_y);
-    char2_texture_cannon->setPos(position_x,position_y);
+    char2_texture_cannon->setPos(position_x+(25/2),position_y+(25/2));
 
 
 
@@ -218,6 +218,21 @@ Game:: Game(int nbjoueur){
         proxy->setPos(L-L/10*2+20+joueurnumero->width()+5, 50);
 
 
+        //Vie du joueur
+
+        QLabel * vie_texte = new QLabel;
+        vie_texte->setText("Vie :");
+        vie_texte->setPalette(fondblanc);
+        proxy = scene->addWidget(vie_texte);
+        proxy->setPos(L-L/10*2+30, 70);
+
+        QLCDNumber * nb_vie = new QLCDNumber;
+        nb_vie->setSegmentStyle(QLCDNumber::Flat);
+        nb_vie->setPalette(fondblanc);
+        nb_vie->display(currentChar->get_pv());
+        QObject::connect(this, SIGNAL(changement_vie(int)), nb_vie, SLOT(display(int)));
+        proxy = scene->addWidget(nb_vie);
+        proxy->setPos(L-L/10*2+30+nb_vie->width(), 70);
 
         //Deplacements restants
         QLabel * text_deplacement = new QLabel;
@@ -419,7 +434,7 @@ void Game::keyPressEvent(QKeyEvent *event)
 
 
     currentChar_texture->setPos(currentChar->getX(), currentChar->getY());
-    currentChar_texture_cannon->setPos(currentChar->getX(), currentChar->getY());
+    currentChar_texture_cannon->setPos(currentChar->getX()+(25/2), currentChar->getY()+(25/2));
 
 
     //UPDATE DE L AIDE AU TIR
@@ -511,10 +526,11 @@ void Game::changerTour() //Fonction declenchée par des actions, remplace tout l
        }
        emplacement_du_futur_tir->setRect(tir_x-rayon_obus, tir_y-rayon_obus, rayon_obus*2, rayon_obus*2);
        ligne_char_emplacement_tir->setLine(tir_x,tir_y, currentChar->getX()+(25/2), currentChar->getY()+(25/2));
-
+       currentChar_texture_cannon->setRotation(-currentChar->getAngle_horizontal());
     currentChar->reset_Deplacement(); //On redonne tout les points de deplacement au char à qui c'est le tour de jouer
     emit changement_deplacement(currentChar->get_nb_Deplacement_Possible()); //On update le compteur de deplacement
     emit changementTour(tour_de_jeu);
+    emit changement_vie(currentChar->get_pv());
     if(char1->get_pv()<1){
         emit signal_findujeu(2); // Si le joueur 1 est mort, fin du jeu, joueur 2 gagne
     }
@@ -534,7 +550,7 @@ void Game::controler_ia(QList<obstacle *> list_ob)
     int depla=0;
     int char_ennemy_x=char1->getX();
     int char_ennemy_y=char1->getY();
-    while (!(collidingObstacle(*currentChar,list_ob)) && currentChar->getX() >0 && currentChar->getY()>0 && depla<15) {
+    while ((!(collidingObstacle(*currentChar,list_ob)) && currentChar->getX() >0 && currentChar->getY()>0 && depla<15) && (!(collidingChar()))) {
 
 
             QTime dieTime = QTime::currentTime().addMSecs( 50 );
@@ -623,14 +639,14 @@ void Game::controler_ia(QList<obstacle *> list_ob)
             }
         }
     }
-    else if (char_ennemy_x-currentChar->getX()<100 &&  char_ennemy_y-currentChar->getY()<100  &&  char_ennemy_y-currentChar->getY()>0  &&  char_ennemy_x-currentChar->getX()>0){
+    else if (char_ennemy_x-currentChar->getX()<100 &&  char_ennemy_y-currentChar->getY()<100){
         tirer(char1->getX(), char1->getY(),2);
         qDebug() << "kaboum";
     }
 
 
     currentChar_texture->setPos(currentChar->getX(), currentChar->getY());
-    currentChar_texture_cannon->setPos(currentChar->getX(), currentChar->getY());
+    currentChar_texture_cannon->setPos(currentChar->getX()+(25/2), currentChar->getY()+(25/2));
 
 
 
@@ -662,6 +678,8 @@ void Game::changer_angle_horizontal(int angle) //Fonction appelée par le slider
     }
     emplacement_du_futur_tir->setRect(tir_x-rayon_obus, tir_y-rayon_obus, rayon_obus*2, rayon_obus*2);
     ligne_char_emplacement_tir->setLine(tir_x,tir_y, currentChar->getX()+(25/2), currentChar->getY()+(25/2));
+    currentChar_texture_cannon->setRotation(-angle);
+
 }
 
 void Game::changer_angle_vertical(int angle)  //Fonction appelée par le slider vertical pour changer l'angle du CurrentChar
@@ -696,7 +714,20 @@ void Game::tir() //Fonction de tir qui calcul l'endroit ou l'obus va tomber suiv
     int depart_y = currentChar->getY() +(25/2);
     int tir_x =  depart_x + distance *  cos(radian_measure);
     int tir_y =  depart_y + distance *  sin(radian_measure);
-    this->tirer(tir_x, tir_y, current_obus);
+    if(current_obus==2){
+        if(currentChar->getNbObus2()>0){
+                this->tirer(tir_x, tir_y, current_obus);
+        }
+    }
+    else if(current_obus==3){
+        if(currentChar->getNbObus3()>0){
+                this->tirer(tir_x, tir_y, current_obus);
+        }
+    }
+    else{
+          this->tirer(tir_x, tir_y, current_obus);
+    }
+
 }
 
 // Les fonctions de changement de type d'obus
@@ -829,6 +860,7 @@ bool Game::collidingChar(){
 
 void Game::tirer(int x, int y, int typeobus)
 {
+    currentChar->tir_Obus(typeobus);
     //son d'un tir
     QMediaPlayer *music= new QMediaPlayer();
     music->setMedia(QUrl("qrc:/sprites/ressources/12780.wav"));
@@ -916,7 +948,6 @@ void Game::tirer(int x, int y, int typeobus)
 
         }
     }
-
 
 
 }

@@ -1,0 +1,15 @@
+INPUT(
+./debug\main.o
+./debug\game.o
+./debug\mafenetre.o
+./debug\char.o
+./debug\terrain.o
+./debug\obstacle.o
+./debug\roche.o
+./debug\eau.o
+./debug\crevasse.o
+./debug\arbre.o
+./debug\qrc_ressources.o
+./debug\moc_game.o
+./debug\moc_mafenetre.o
+);

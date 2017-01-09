@@ -27,7 +27,7 @@ int Char::getNbObus2() const{
 }
 
 int Char::getNbObus3() const{
-    return this->nbObus2;
+    return this->nbObus3;
 }
 
 void Char::enlever_pv(int degats)
@@ -43,10 +43,10 @@ int Char::get_pv()
 void Char::tir_Obus(int type_obus){
     switch(type_obus){
         case 2:
-            this->nbObus2 -= 1;
+            this->nbObus2 = this->nbObus2-1;
             break;
         case 3:
-            this->nbObus3 -= 1;
+            this->nbObus3 = this->nbObus3-1;
             break;
     default:
             break;
